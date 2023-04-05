@@ -1,24 +1,7 @@
 // Credit: Mateusz Rybczonec
 
 const FULL_DASH_ARRAY = 283;
-const WARNING_THRESHOLD = 10;
-const ALERT_THRESHOLD = 5;
-
-const COLOR_CODES = {
-    info: {
-        color: "green"
-    },
-    warning: {
-        color: "orange",
-        threshold: WARNING_THRESHOLD
-    },
-    alert: {
-        color: "red",
-        threshold: ALERT_THRESHOLD
-    }
-};
-
-let TIME_LIMIT = 0;
+let timeLimit = 0;
 const set_button = document.getElementById("set");
 const start_button = document.getElementById("start");
 const play_button = document.getElementById("play");
@@ -29,10 +12,25 @@ const minuteInput = document.getElementById("minutes-input");
 const SecondInput = document.getElementById("seconds-input");
 const audio = new Audio("res/alarm.wav");
 let timePassed = 0;
-let timeLeft = TIME_LIMIT;
+let timeLeft = timeLimit;
 let timerInterval = null;
-let remainingPathColor = COLOR_CODES.info.color;
 let isPaused = true;
+let warningThreshold = timeLimit * 0.2;
+let alertThreshold = timeLimit * 0.1;
+let colorCodes = {
+    info: {
+        color: "green"
+    },
+    warning: {
+        color: "orange",
+        threshold: warningThreshold
+    },
+    alert: {
+        color: "red",
+        threshold: alertThreshold
+    }
+};
+let remainingPathColor = colorCodes.info.color;
 
 document.getElementById("app").innerHTML = `
 <div class="base-timer">
@@ -59,22 +57,36 @@ document.getElementById("app").innerHTML = `
 `;
 
 start_button.addEventListener("click", () => {
-    TIME_LIMIT = 3600 * parseInt(document.getElementById("hour-input").value) + 60 * parseInt(document.getElementById("minutes-input").value) + parseInt(document.getElementById("seconds-input").value);
-    console.log(TIME_LIMIT)
+    timeLimit = 3600 * parseInt(document.getElementById("hour-input").value) + 60 * parseInt(document.getElementById("minutes-input").value) + parseInt(document.getElementById("seconds-input").value);
+    console.log(timeLimit)
     isPaused = false;
-    timeLeft = TIME_LIMIT;
+    timeLeft = timeLimit;
     timePassed = 0;
-    console.log(TIME_LIMIT)
+    console.log(timeLimit)
     clearInterval(timerInterval);
     startTimer();
 })
 set_button.addEventListener("click", () => {
-    TIME_LIMIT = 3600 * parseInt(document.getElementById("hour-input").value) + 60 * parseInt(document.getElementById("minutes-input").value) + parseInt(document.getElementById("seconds-input").value);
-    console.log(TIME_LIMIT)
+    timeLimit = 3600 * parseInt(document.getElementById("hour-input").value) + 60 * parseInt(document.getElementById("minutes-input").value) + parseInt(document.getElementById("seconds-input").value);
+    warningThreshold = timeLimit * 0.2;
+    alertThreshold = timeLimit * 0.1;
+    colorCodes = {
+        info: {
+            color: "green"
+        },
+        warning: {
+            color: "orange",
+            threshold: warningThreshold
+        },
+        alert: {
+            color: "red",
+            threshold: alertThreshold
+        }
+    };
     isPaused = true;
-    timeLeft = TIME_LIMIT;
+    timeLeft = timeLimit;
     timePassed = 0;
-    console.log(TIME_LIMIT)
+    console.log(timeLimit)
     clearInterval(timerInterval);
     startTimer();
 })
@@ -86,7 +98,7 @@ pause_button.addEventListener("click", () => {
 });
 reset_button.addEventListener("click", () => {
     isPaused = true;
-    timeLeft = TIME_LIMIT;
+    timeLeft = timeLimit;
     timePassed = 0;
     clearInterval(timerInterval)
     startTimer();
@@ -101,7 +113,7 @@ function onTimesUp() {
 function runTimer() {
     if (!isPaused) {
         timePassed = timePassed += 1;
-        timeLeft = TIME_LIMIT - timePassed;
+        timeLeft = timeLimit - timePassed;
         setCircleDasharray();
         setRemainingPathColor(timeLeft);
         if (timeLeft % 3600 == 0) {
@@ -139,7 +151,7 @@ function formatTime(time) {
 }
 
 function setRemainingPathColor(timeLeft) {
-    const { alert, warning, info } = COLOR_CODES;
+    const { alert, warning, info } = colorCodes;
     if (timeLeft <= alert.threshold) {
         document
             .getElementById("base-timer-path-remaining")
@@ -158,8 +170,8 @@ function setRemainingPathColor(timeLeft) {
 }
 
 function calculateTimeFraction() {
-    const rawTimeFraction = timeLeft / TIME_LIMIT;
-    return rawTimeFraction - (1 / TIME_LIMIT) * (1 - rawTimeFraction);
+    const rawTimeFraction = timeLeft / timeLimit;
+    return rawTimeFraction - (1 / timeLimit) * (1 - rawTimeFraction);
 }
 
 function setCircleDasharray() {
